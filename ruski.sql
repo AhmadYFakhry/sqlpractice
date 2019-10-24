@@ -6,19 +6,19 @@ USE ruskidb;
 -- +--------------------+ 			  +--------------------+
 -- | maker varchar(10)  |			  | code int  		   |
 -- | model varchar(50)  |	======>	  | model varchar(50)  |
--- | type varchar(50    |	|		  |	speed smallint	   |
--- +--------------------+	|		  | ram smallint	   |
--- | pc                 |	|		  |	hd real            |
--- +--------------------+	|	      |	price money        |
--- | code int           |	|	      | screen tinyint     |
--- | model varchar(50)  | <=|		  +--------------------+
--- | speed smallint     |	|
--- | ram smallint       |	|
--- | hd real            |	|
--- | cd varhcar(10)		|	|		+-------------------+
--- | price money        |	|		| printer			|
--- +--------------------+	|		+-------------------+
--- 							|		| code int     		|
+-- | type varchar(50    |	||		  |	speed smallint	   |
+-- +--------------------+	||		  | ram smallint	   |
+-- | pc                 |	||		  |	hd real            |
+-- +--------------------+	||	      |	price money        |
+-- | code int           |	||	      | screen tinyint     |
+-- | model varchar(50)  | <=||		  +--------------------+
+-- | speed smallint     |	||
+-- | ram smallint       |	||
+-- | hd real            |	||
+-- | cd varhcar(10)		|	||		+-------------------+
+-- | price money        |	||		| printer			|
+-- +--------------------+	||		+-------------------+
+-- 							||		| code int     		|
 -- 							====>	| model varchar(50) |
 -- 									| color char(1)     |
 -- 									| type varhcar(10)	|
@@ -31,56 +31,99 @@ USE ruskidb;
 
 SELECT
 	model,
-    speed,
-    hd
-FROM 
+	speed,
+	hd
+FROM
 	pc
 WHERE
 	price < 500;
 
 -- 2) Find the printer makers
 
-SELECT 
-	maker 
-FROM 
+SELECT
+	maker
+FROM
 	Product
 WHERE model in (
-	SELECT model FROM Printer
+	SELECT model
+FROM Printer
     );
 
 -- 3) Find the model number, RAM and screen size of the laptops with prices over $1000. 
 
 SELECT
 	model,
-    ram,
-    screen
-FROM 
+	ram,
+	screen
+FROM
 	laptop
 WHERE price > 1000;
 
 --  4) Find the model number, speed and hard drive capacity of the PCs having 
 -- 12x CD and prices less than $600 or having 24x CD and prices less than $600. 
+
 SELECT
 	model,
-    hd
+	hd
 FROM
 	pc
 WHERE (cd = '12' AND price > 600) OR (cd = '24' AND prices < 600);
 
 -- 5) For each maker producing laptops with a hard drive capacity of 10 Gb or higher, find the speed of such laptops. 
 -- Result set: maker, speed. 
+
 SELECT
 	product.maker, Laptop.speed
-FROM 
+FROM
 	product, laptop
 WHERE laptop.hd >= 10;
+
 -- Find out the models and prices for all the products (of any type) produced by maker B. 
+
+SELECT
+	*
+FROM
+	product
+	INNER JOIN laptops
+		ON product.model = laptop.model
+	INNER JOIN pc
+		ON	product.model = pc.model
+	INNER JOIN printer
+		ON product.model = printer.model
+WHERE product.maker = 'B';
 
 -- Find out the makers that sale PCs but not laptops. 
 
+SELECT
+	* 
+FROM 
+	product 
+INNER JOIN pc 
+	ON product.model = pc.model
+LEFT JOIN laptop
+	ON product.model = laptop.model;
+
 -- Find the printers having the highest price. Result set: model, price. 
 
+SELECT 
+	product.model, 
+	printer.price
+FROM 
+	product, 
+	printer
+INNER JOIN 
+	printer
+ON 
+	product.model = printer.model
+ORDER BY 
+	price DESC;
+
 -- Find out the average speed of PCs. 
+
+SELECT 
+	AVG(speed) 
+FROM 
+	pc;
 
 -- Find all the makers who have all their models of PC type in the PC table 
 
