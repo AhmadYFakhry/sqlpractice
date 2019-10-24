@@ -78,7 +78,7 @@ FROM
 	product, laptop
 WHERE laptop.hd >= 10;
 
--- Find out the models and prices for all the products (of any type) produced by maker B. 
+-- 6) Find out the models and prices for all the products (of any type) produced by maker B. 
 
 SELECT
 	*
@@ -92,7 +92,7 @@ FROM
 		ON product.model = printer.model
 WHERE product.maker = 'B';
 
--- Find out the makers that sale PCs but not laptops. 
+-- 7) Find out the makers that sale PCs but not laptops. 
 
 SELECT
 	* 
@@ -103,7 +103,7 @@ INNER JOIN pc
 LEFT JOIN laptop
 	ON product.model = laptop.model;
 
--- Find the printers having the highest price. Result set: model, price. 
+-- 8) Find the printers having the highest price. Result set: model, price. 
 
 SELECT 
 	product.model, 
@@ -118,40 +118,86 @@ ON
 ORDER BY 
 	price DESC;
 
--- Find out the average speed of PCs. 
+-- 9) Find out the average speed of PCs. 
 
 SELECT 
 	AVG(speed) 
 FROM 
 	pc;
 
--- Find all the makers who have all their models of PC type in the PC table 
+-- 10) Find all the makers who have all their models of PC type in the PC table 
 
--- Find out the average speed of the PCs produced by maker A. 
+SELECT 
+	maker
+FROM
+	product
+WHERE product.type = 'pc';
 
--- For Product table, receive result set in the form of a table with columns: 
+-- 11) Find out the average speed of the PCs produced by maker A. 
+
+SELECT
+	AVG(speed)
+FROM pc
+	WHERE maker IN (
+		SELECT maker
+		FROM product
+		WHERE maker = 'A' 
+	);
+
+-- 12) For Product table, receive result set in the form of a table with columns: 
 -- maker, pc, laptop, and printer.For each maker, this table must include "yes" if a maker has products of corresponding type or "no" otherwise.
 -- In the first case (yes), specify in brackets (without spaces) the quantity of available distinct models of 
 -- corresponding type (i.e. being in PC, Laptop, and Printer tables). 
 
--- Find the hard drive sizes that are equal among two or more PCs. Result set: hd. 
+-- 13) Find the hard drive sizes that are equal among two or more PCs. Result set: hd. 
 
--- Find the pairs of PC models having similar speeds and RAM. 
+-- 14) Find the pairs of PC models having similar speeds and RAM. 
 -- As a result, each resulting pair is shown only once, i.e. (i, j) but not (j, i). 
 -- Result set: model with high number, model with low number, speed, and RAM. 
 
--- Find the laptops having speeds less than all PCs. Result set: type, model, speed. 
+-- 15) Find the laptops having speeds less than all PCs. Result set: type, model, speed. 
 
--- Find the makers of the cheapest color printers. Result set: maker, price. 
+-- 16) Find the makers of the cheapest color printers. Result set: maker, price. 
 
--- Find the makers producing at least three distinct models of PCs. Result set: maker, number of models. 
+-- 17) Find the makers producing at least three distinct models of PCs. Result set: maker, number of models. 
 
--- Find the makers producing at least both a pc having speed not less than 750 MHz and a laptop having speed not less than 750 MHz. Result set: Maker 
+-- 18) Find the makers producing at least both a pc having speed not less than 750 MHz and a laptop having speed not less than 750 MHz. 
+-- Result set: Maker 
 
--- Find the model number of the product (PC, laptop, or printer) with the highest price.Result set: model 
+SELECT 
+	maker
+FROM
+	products
+WHERE model in (
+	SELECT
+		speed
+	FROM
+		pc,
+		laptop
+	WHERE speed > 750;
+);
 
--- Find the printer makers which also produce PCs with the lowest RAM and the highest-speed processor among PCs with the lowest RAM. Result set: maker. 
+-- 19) Find the model number of the product (PC, laptop, or printer) with the highest price.
+-- Result set: model 
 
--- Define the average price of the PCs and laptops produced by maker A.Result set: single total price. 
+-- 20) Find the printer makers which also produce PCs with the lowest RAM and the highest-speed processor among PCs with the lowest RAM. Result set: maker. 
 
--- Define the average size of the PC hard drive for each maker that also produces printers.Result set: maker, average capacity of HD. 
+-- 21) Define the average price of the PCs and laptops produced by maker A.
+-- Result set: single total price. 
+
+SELECT 
+	AVG(price) 
+FROM 
+	pc,
+	laptop
+WHERE 
+	model in (
+		SELECT 
+			* 
+		from 
+			product
+		WHERE product.maker = 'A'
+	);
+
+-- 22) Define the average size of the PC hard drive for each maker that also produces printers.
+-- Result set: maker, average capacity of HD. 
