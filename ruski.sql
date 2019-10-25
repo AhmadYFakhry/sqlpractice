@@ -149,7 +149,12 @@ FROM pc
 -- In the first case (yes), specify in brackets (without spaces) the quantity of available distinct models of 
 -- corresponding type (i.e. being in PC, Laptop, and Printer tables). 
 
-
+SELECT 
+	COUNT(*)
+FROM 	
+	Product
+WHERE 
+	Maker = 'E' AND type='PC';
 
 -- 13) Find the hard drive sizes that are equal among two or more PCs. Result set: hd. 
 
