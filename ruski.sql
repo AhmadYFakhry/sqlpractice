@@ -149,7 +149,22 @@ FROM pc
 -- In the first case (yes), specify in brackets (without spaces) the quantity of available distinct models of 
 -- corresponding type (i.e. being in PC, Laptop, and Printer tables). 
 
+
+
 -- 13) Find the hard drive sizes that are equal among two or more PCs. Result set: hd. 
+
+SELECT distinct 
+	t.hd
+FROM 
+	PC t
+WHERE EXISTS
+	(SELECT 
+		*
+	FROM
+		PC
+	WHERE pc.hd = t.hd AND pc.model <> t.model
+);
+
 
 -- 14) Find the pairs of PC models having similar speeds and RAM. 
 -- As a result, each resulting pair is shown only once, i.e. (i, j) but not (j, i). 
@@ -157,14 +172,39 @@ FROM pc
 
 -- 15) Find the laptops having speeds less than all PCs. Result set: type, model, speed. 
 
+SELECT
+	type,
+	model,
+	speed,
+FROM
+	product, pc
+WHERE product.type = 'laptop' AND laptop.speed < min(pc.speed);
+
 -- 16) Find the makers of the cheapest color printers. Result set: maker, price. 
 
--- 17) Find the makers producing at least three distinct models of PCs. Result set: maker, number of models. 
+SELECT
+	Product.maker, Printer.price
+FROM
+	Product, Printer
+WHERE Printer.colour = 'y'
+ORDER BY Printer.price ASC
+LIMIT 1;
+
+
+-- 17) Find the makers producing at least three distinct models of PCs. 
+-- Result set: maker, number of models. 
+
+SELECT
+	Product.maker, PC.model
+FROM
+	Product, PC
+WHERE
+	Product.model = PC.model;
 
 -- 18) Find the makers producing at least both a pc having speed not less than 750 MHz and a laptop having speed not less than 750 MHz. 
 -- Result set: Maker 
 
-SELECT 
+SELECT distinct
 	maker
 FROM
 	products
@@ -172,15 +212,57 @@ WHERE model in (
 	SELECT
 		speed
 	FROM
-		pc,
-		laptop
-	WHERE speed > 750;
+		pc
+	WHERE speed > 750
+	UNION ALL
+	SELECT
+		speed
+	FROM
+		laptops
+	WHERE speed > 750
 );
 
 -- 19) Find the model number of the product (PC, laptop, or printer) with the highest price.
 -- Result set: model 
 
--- 20) Find the printer makers which also produce PCs with the lowest RAM and the highest-speed processor among PCs with the lowest RAM. Result set: maker. 
+SELECT
+	model
+FROM (
+	SELECT 
+		model, 
+		price
+		WHERE 
+			price = (SELECT max(price) FROM pc)
+	UNION
+	SELECT
+		model,
+		price
+	WHERE
+		price = (SELECT max(price) FROM laptop)
+	UNION
+	SELECT
+		model,
+		price
+	WHERE
+		price = (SELECT max(price) FROM printer);
+);	
+
+
+
+-- 20) Find the printer makers which also produce PCs with the lowest RAM and the highest-speed processor among PCs with the lowest RAM. 
+-- Result set: maker. 
+
+SELECT
+	maker
+FROM
+	products
+WHERE maker IN (
+	SELECT 
+		* 
+	FROM
+		pc
+	WHERE ram = min(ram) AND cpu = max(cpu)
+);
 
 -- 21) Define the average price of the PCs and laptops produced by maker A.
 -- Result set: single total price. 
@@ -201,3 +283,19 @@ WHERE
 
 -- 22) Define the average size of the PC hard drive for each maker that also produces printers.
 -- Result set: maker, average capacity of HD. 
+
+SELECT Result.maker, avg(pc.hd)
+FROM (SELECT pc.hd, Product.maker
+	  FROM PC INNER JOIN
+	  	Product ON PC.model = product.model
+		WHERE Product.maker IN (
+			SELECT 
+				Product1.maker 
+			FROM 
+				product product1
+			INNER JOIN Printer
+			ON Product1.model = printer.model
+			GROUP BY Product1.maker
+		) AS result
+	)
+GROUP BY result.maker;
